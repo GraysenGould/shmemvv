@@ -9,6 +9,7 @@
 
 #include "log.h"
 #include "shmemvv.h"
+#include "datatypes.h"
 
 #define TEST_C11_SHMEM_G(TYPE)                                                 \
   ({                                                                           \
@@ -26,7 +27,7 @@
       log_info("PE 0: Initialized src = %d", (int)src);                        \
     }                                                                          \
                                                                                \
-    shmem_barrier_all(); /*why need a barrier here?*/                                                       \
+    shmem_barrier_all();                                                       \
     log_info("Completed barrier synchronization");                             \
                                                                                \
     if (mype == 1) {                                                           \
@@ -129,32 +130,6 @@ int main(int argc, char *argv[]) {
   int result = true;
   int rc = EXIT_SUCCESS;
 
-  #define RMA_TYPES \
-    X(float) \
-    X(double) \
-    X(long double) \
-    X(char) \
-    X(signed char) \
-    X(short) \
-    X(int)\
-    X(long)\
-    X(long long)\
-    X(unsigned char)\
-    X(unsigned short)\
-    X(unsigned int)\
-    X(unsigned long)\
-    X(unsigned long long)\
-    X(int8_t)\
-    X(int16_t)\
-    X(int32_t)\
-    X(int64_t)\
-    X(uint8_t)\
-    X(uint16_t)\
-    X(uint32_t)\
-    X(uint64_t)\
-    X(size_t)\
-    X(ptrdiff_t)
-
 
   #define X(type) result &= TEST_C11_SHMEM_G(type);
     RMA_TYPES
@@ -172,6 +147,7 @@ int main(int argc, char *argv[]) {
 
   int result_ctx = true;
 
+  /* Test context-specific shmem_g variants */
   #define X(type) result &= TEST_C11_CTX_SHMEM_G(type);
     RMA_TYPES
   #undef X
