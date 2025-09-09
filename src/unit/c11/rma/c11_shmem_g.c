@@ -26,7 +26,7 @@
       log_info("PE 0: Initialized src = %d", (int)src);                        \
     }                                                                          \
                                                                                \
-    shmem_barrier_all();                                                       \
+    shmem_barrier_all(); /*why need a barrier here?*/                                                       \
     log_info("Completed barrier synchronization");                             \
                                                                                \
     if (mype == 1) {                                                           \
@@ -129,30 +129,36 @@ int main(int argc, char *argv[]) {
   int result = true;
   int rc = EXIT_SUCCESS;
 
-  result &= TEST_C11_SHMEM_G(long);
-  result &= TEST_C11_SHMEM_G(double);
-  result &= TEST_C11_SHMEM_G(long double);
-  result &= TEST_C11_SHMEM_G(char);
-  result &= TEST_C11_SHMEM_G(signed char);
-  result &= TEST_C11_SHMEM_G(short);
-  result &= TEST_C11_SHMEM_G(int);
-  result &= TEST_C11_SHMEM_G(long);
-  result &= TEST_C11_SHMEM_G(long long);
-  result &= TEST_C11_SHMEM_G(unsigned char);
-  result &= TEST_C11_SHMEM_G(unsigned short);
-  result &= TEST_C11_SHMEM_G(unsigned int);
-  result &= TEST_C11_SHMEM_G(unsigned long);
-  result &= TEST_C11_SHMEM_G(unsigned long long);
-  result &= TEST_C11_SHMEM_G(int8_t);
-  result &= TEST_C11_SHMEM_G(int16_t);
-  result &= TEST_C11_SHMEM_G(int32_t);
-  result &= TEST_C11_SHMEM_G(int64_t);
-  result &= TEST_C11_SHMEM_G(uint8_t);
-  result &= TEST_C11_SHMEM_G(uint16_t);
-  result &= TEST_C11_SHMEM_G(uint32_t);
-  result &= TEST_C11_SHMEM_G(uint64_t);
-  result &= TEST_C11_SHMEM_G(size_t);
-  result &= TEST_C11_SHMEM_G(ptrdiff_t);
+  #define RMA_TYPES \
+    X(float) \
+    X(double) \
+    X(long double) \
+    X(char) \
+    X(signed char) \
+    X(short) \
+    X(int)\
+    X(long)\
+    X(long long)\
+    X(unsigned char)\
+    X(unsigned short)\
+    X(unsigned int)\
+    X(unsigned long)\
+    X(unsigned long long)\
+    X(int8_t)\
+    X(int16_t)\
+    X(int32_t)\
+    X(int64_t)\
+    X(uint8_t)\
+    X(uint16_t)\
+    X(uint32_t)\
+    X(uint64_t)\
+    X(size_t)\
+    X(ptrdiff_t)
+
+
+  #define X(type) result &= TEST_C11_SHMEM_G(type);
+    RMA_TYPES
+  #undef X
 
   shmem_barrier_all();
 
@@ -166,31 +172,9 @@ int main(int argc, char *argv[]) {
 
   int result_ctx = true;
 
-  /* Test context-specific shmem_g variants */
-  result_ctx &= TEST_C11_CTX_SHMEM_G(long);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(double);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(long double);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(char);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(signed char);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(short);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(int);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(long);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(long long);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(unsigned char);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(unsigned short);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(unsigned int);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(unsigned long);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(unsigned long long);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(int8_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(int16_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(int32_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(int64_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(uint8_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(uint16_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(uint32_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(uint64_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(size_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_G(ptrdiff_t);
+  #define X(type) result &= TEST_C11_CTX_SHMEM_G(type);
+    RMA_TYPES
+  #undef X
 
   shmem_barrier_all();
 
