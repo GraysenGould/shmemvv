@@ -145,30 +145,10 @@ int main(int argc, char *argv[]) {
   int result = true;
   int rc = EXIT_SUCCESS;
 
-  result &= TEST_C11_SHMEM_GET_NBI(float);
-  result &= TEST_C11_SHMEM_GET_NBI(double);
-  result &= TEST_C11_SHMEM_GET_NBI(long double);
-  result &= TEST_C11_SHMEM_GET_NBI(char);
-  result &= TEST_C11_SHMEM_GET_NBI(signed char);
-  result &= TEST_C11_SHMEM_GET_NBI(short);
-  result &= TEST_C11_SHMEM_GET_NBI(int);
-  result &= TEST_C11_SHMEM_GET_NBI(long);
-  result &= TEST_C11_SHMEM_GET_NBI(long long);
-  result &= TEST_C11_SHMEM_GET_NBI(unsigned char);
-  result &= TEST_C11_SHMEM_GET_NBI(unsigned short);
-  result &= TEST_C11_SHMEM_GET_NBI(unsigned int);
-  result &= TEST_C11_SHMEM_GET_NBI(unsigned long);
-  result &= TEST_C11_SHMEM_GET_NBI(unsigned long long);
-  result &= TEST_C11_SHMEM_GET_NBI(int8_t);
-  result &= TEST_C11_SHMEM_GET_NBI(int16_t);
-  result &= TEST_C11_SHMEM_GET_NBI(int32_t);
-  result &= TEST_C11_SHMEM_GET_NBI(int64_t);
-  result &= TEST_C11_SHMEM_GET_NBI(uint8_t);
-  result &= TEST_C11_SHMEM_GET_NBI(uint16_t);
-  result &= TEST_C11_SHMEM_GET_NBI(uint32_t);
-  result &= TEST_C11_SHMEM_GET_NBI(uint64_t);
-  result &= TEST_C11_SHMEM_GET_NBI(size_t);
-  result &= TEST_C11_SHMEM_GET_NBI(ptrdiff_t);
+  /* Test standard shmem_get_nbi variants */
+  #define X(type) result &= TEST_C11_SHMEM_GET_NBI(type);
+    RMA_TYPES
+  #undef X
 
   shmem_barrier_all();
 
@@ -183,30 +163,10 @@ int main(int argc, char *argv[]) {
   /* Test context-specific shmem_get_nbi variants */
   int result_ctx = true;
 
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(float);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(double);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(long double);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(char);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(signed char);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(short);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(int);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(long);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(long long);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(unsigned char);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(unsigned short);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(unsigned int);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(unsigned long);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(unsigned long long);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(int8_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(int16_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(int32_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(int64_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(uint8_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(uint16_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(uint32_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(uint64_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(size_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(ptrdiff_t);
+  #define X(type) result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(type);
+    RMA_TYPES
+  #undef X
+
 
   shmem_barrier_all();
 

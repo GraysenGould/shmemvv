@@ -9,6 +9,7 @@
 
 #include "log.h"
 #include "shmemvv.h"
+#include "datatypes.h"
 
 #define TEST_C11_SHMEM_IGET(TYPE)                                              \
   ({                                                                           \
@@ -149,30 +150,9 @@ int main(int argc, char *argv[]) {
   int rc = EXIT_SUCCESS;
 
   /* Test standard shmem_iget variants */
-  result &= TEST_C11_SHMEM_IGET(float);
-  result &= TEST_C11_SHMEM_IGET(double);
-  result &= TEST_C11_SHMEM_IGET(long double);
-  result &= TEST_C11_SHMEM_IGET(char);
-  result &= TEST_C11_SHMEM_IGET(signed char);
-  result &= TEST_C11_SHMEM_IGET(short);
-  result &= TEST_C11_SHMEM_IGET(int);
-  result &= TEST_C11_SHMEM_IGET(long);
-  result &= TEST_C11_SHMEM_IGET(long long);
-  result &= TEST_C11_SHMEM_IGET(unsigned char);
-  result &= TEST_C11_SHMEM_IGET(unsigned short);
-  result &= TEST_C11_SHMEM_IGET(unsigned int);
-  result &= TEST_C11_SHMEM_IGET(unsigned long);
-  result &= TEST_C11_SHMEM_IGET(unsigned long long);
-  result &= TEST_C11_SHMEM_IGET(int8_t);
-  result &= TEST_C11_SHMEM_IGET(int16_t);
-  result &= TEST_C11_SHMEM_IGET(int32_t);
-  result &= TEST_C11_SHMEM_IGET(int64_t);
-  result &= TEST_C11_SHMEM_IGET(uint8_t);
-  result &= TEST_C11_SHMEM_IGET(uint16_t);
-  result &= TEST_C11_SHMEM_IGET(uint32_t);
-  result &= TEST_C11_SHMEM_IGET(uint64_t);
-  result &= TEST_C11_SHMEM_IGET(size_t);
-  result &= TEST_C11_SHMEM_IGET(ptrdiff_t);
+  #define X(type) result &= TEST_C11_SHMEM_IGET(type);
+    RMA_TYPES
+  #undef X
 
   shmem_barrier_all();
 
@@ -186,31 +166,10 @@ int main(int argc, char *argv[]) {
 
   /* Test context-specific shmem_iget variants */
   int result_ctx = true;
-
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(float);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(double);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(long double);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(char);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(signed char);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(short);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(int);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(long);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(long long);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(unsigned char);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(unsigned short);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(unsigned int);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(unsigned long);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(unsigned long long);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(int8_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(int16_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(int32_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(int64_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(uint8_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(uint16_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(uint32_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(uint64_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(size_t);
-  result_ctx &= TEST_C11_CTX_SHMEM_IGET(ptrdiff_t);
+  
+  #define X(type) result_ctx &= TEST_C11_CTX_SHMEM_IGET(type);
+    RMA_TYPES
+  #undef X
 
   shmem_barrier_all();
 
