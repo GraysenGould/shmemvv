@@ -38,12 +38,7 @@
                (void *)dest, (void *)src);                                     \
       shmem_iget(dest, src, 2, 2, 5, 0);                                       \
       log_info("PE 1: Completed strided get operation");                       \
-    }                                                                          \
-                                                                               \
-    shmem_barrier_all();                                                       \
-    log_info("Completed barrier synchronization");                             \
-                                                                               \
-    if (mype == 1) {                                                           \
+                                                                                \
       log_info("PE 1: Beginning validation of received data");                 \
       for (int i = 0; i < 10; i += 2) {                                        \
         if (dest[i] != i) {                                                    \
@@ -101,12 +96,7 @@
                (void *)dest, (void *)src);                                     \
       shmem_iget(ctx, dest, src, 2, 2, 5, 0);                                  \
       log_info("PE 1: Completed context-based strided get operation");         \
-    }                                                                          \
                                                                                \
-    shmem_barrier_all();                                                       \
-    log_info("Completed barrier synchronization");                             \
-                                                                               \
-    if (mype == 1) {                                                           \
       log_info("PE 1: Beginning validation of received data");                 \
       for (int i = 0; i < 10; i += 2) {                                        \
         int expected = i + 20;                                                 \
