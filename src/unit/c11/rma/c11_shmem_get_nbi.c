@@ -9,6 +9,8 @@
 
 #include "log.h"
 #include "shmemvv.h"
+#include "type_tables.h"
+
 
 #define TEST_C11_SHMEM_GET_NBI(TYPE)                                           \
   ({                                                                           \
@@ -34,14 +36,10 @@
     if (mype == 1) {                                                           \
       log_info("PE 1: Starting non-blocking get of 10 elements from PE 0");    \
       shmem_get_nbi(dest, src, 10, 0);                                         \
+                                                                               \
       log_info("PE 1: Calling quiet to ensure completion");                    \
       shmem_quiet();                                                           \
-    }                                                                          \
                                                                                \
-    shmem_barrier_all();                                                       \
-    log_info("Completed barrier synchronization");                             \
-                                                                               \
-    if (mype == 1) {                                                           \
       log_info("PE 1: Beginning validation of received data");                 \
       for (int i = 0; i < 10; i++) {                                           \
         if (dest[i] != i) {                                                    \
@@ -96,14 +94,10 @@
     if (mype == 1) {                                                           \
       log_info("PE 1: Starting context-based non-blocking get from PE 0");     \
       shmem_get_nbi(ctx, dest, src, 10, 0);                                    \
+                                                                               \
       log_info("PE 1: Calling quiet on context to ensure completion");         \
       shmem_ctx_quiet(ctx);                                                    \
-    }                                                                          \
                                                                                \
-    shmem_barrier_all();                                                       \
-    log_info("Completed barrier synchronization");                             \
-                                                                               \
-    if (mype == 1) {                                                           \
       log_info("PE 1: Beginning validation of received data");                 \
       for (int i = 0; i < 10; i++) {                                           \
         if (dest[i] != i + 20) {                                               \
@@ -120,7 +114,7 @@
     } else {                                                                   \
       log_info("PE 0: Waiting for PE 1 to complete validation");               \
     }                                                                          \
-                                                                               \
+    shmem_barrier_all();                                                       \
     /* Destroy the context */                                                  \
     shmem_ctx_destroy(ctx);                                                    \
     log_info("Context destroyed");                                             \
@@ -146,8 +140,8 @@ int main(int argc, char *argv[]) {
   int rc = EXIT_SUCCESS;
 
   /* Test standard shmem_get_nbi variants */
-  #define X(type) result &= TEST_C11_SHMEM_GET_NBI(type);
-    RMA_TYPES
+  #define X(type, shmem_type) result &= TEST_C11_SHMEM_GET_NBI(type);
+    SHMEM_STANDARD_RMA_TYPE_TABLE(X)
   #undef X
 
   shmem_barrier_all();
@@ -163,10 +157,9 @@ int main(int argc, char *argv[]) {
   /* Test context-specific shmem_get_nbi variants */
   int result_ctx = true;
 
-  #define X(type) result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(type);
-    RMA_TYPES
+  #define X(type, shmem_type) result_ctx &= TEST_C11_CTX_SHMEM_GET_NBI(type);
+    SHMEM_STANDARD_RMA_TYPE_TABLE(X)
   #undef X
-
 
   shmem_barrier_all();
 

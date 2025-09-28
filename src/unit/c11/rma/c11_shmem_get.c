@@ -9,7 +9,7 @@
 
 #include "log.h"
 #include "shmemvv.h"
-#include "datatypes.h"
+#include "type_tables.h"
 
 #define TEST_C11_SHMEM_GET(TYPE)                                               \
   ({                                                                           \
@@ -135,8 +135,8 @@ int main(int argc, char *argv[]) {
   int rc = EXIT_SUCCESS;
 
   /* Test standard shmem_get variants */
-  #define X(type) result &= TEST_C11_SHMEM_GET(type);
-    RMA_TYPES
+  #define X(type, shmem_types) result &= TEST_C11_SHMEM_GET(type);
+    SHMEM_STANDARD_RMA_TYPE_TABLE(X)
   #undef X
 
   shmem_barrier_all();
@@ -152,8 +152,8 @@ int main(int argc, char *argv[]) {
   /* Test context-specific shmem_get variants */
   int result_ctx = true;
 
-  #define X(type) result_ctx &= TEST_C11_CTX_SHMEM_GET(type);
-    RMA_TYPES
+  #define X(type, shmem_types) result_ctx &= TEST_C11_CTX_SHMEM_GET(type);
+    SHMEM_STANDARD_RMA_TYPE_TABLE(X)
   #undef X
 
   shmem_barrier_all();
