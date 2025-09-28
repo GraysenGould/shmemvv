@@ -38,7 +38,7 @@
                (void *)dest, (void *)src);                                     \
       shmem_iget(dest, src, 2, 2, 5, 0);                                       \
       log_info("PE 1: Completed strided get operation");                       \
-                                                                                \
+                                                                               \
       log_info("PE 1: Beginning validation of received data");                 \
       for (int i = 0; i < 10; i += 2) {                                        \
         if (dest[i] != i) {                                                    \
