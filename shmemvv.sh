@@ -193,7 +193,7 @@ run_test() {
 
 
   # --- Run the test and capture output
-  local output=$($LAUNCHER $LAUNCHER_ARGS -n $np $test_path 2>&1)
+  local output=$($LAUNCHER $LAUNCHER_ARGS -np $np $test_path 2>&1)
   local status=$?
 
   # --- Display the test output
