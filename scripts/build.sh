@@ -5,10 +5,11 @@
 
 mkdir build ; cd build
 
-OSHCC=$OSSS_TESTING_BIN/oshcc
+OSHCC=$(which oshcc)
 
 cmake \
     -DCMAKE_C_COMPILER=$OSHCC \
+    -DCMAKE_C_FLAGS="-lm -ldl" \
     ..
 
 # --- Compile

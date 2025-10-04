@@ -191,7 +191,6 @@ run_test() {
     echo "Command: $LAUNCHER $LAUNCHER_ARGS -np $np $test_path"
   fi
 
-  #echo "Command: $LAUNCHER $LAUNCHER_ARGS -np $np $test_path"
 
   # --- Run the test and capture output
   local output=$($LAUNCHER $LAUNCHER_ARGS -n $np $test_path 2>&1)
