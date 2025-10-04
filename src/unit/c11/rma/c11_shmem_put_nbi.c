@@ -9,6 +9,7 @@
 
 #include "log.h"
 #include "shmemvv.h"
+#include "type_tables.h"
 
 #define TEST_C11_SHMEM_PUT_NBI(TYPE)                                           \
   ({                                                                           \
