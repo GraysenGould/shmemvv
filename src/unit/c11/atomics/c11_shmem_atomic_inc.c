@@ -59,11 +59,11 @@
     for (int i = 0; i < count; i ++){                                          \
         shmem_atomic_inc(counter, 0);                                          \
     }                                                                          \
-    shmem_quiet(); \
+    shmem_quiet();                                                             \
     shmem_barrier_all();                                                       \
     if (my_pe == 0){                                                           \
         log_info("PE 0: Validating incrementing results");                     \
-        log_info("Expected count: %d, Actual: %d", (npes  * count), *counter);\
+        log_info("Expected count: %d, Actual: %d", (npes  * count), *counter); \
         if (*counter == (npes * count)){                                       \
             log_info("PE 0: Count is correct: %d",*counter);                   \
         }                                                                      \
@@ -144,7 +144,7 @@
     for (int i = 0; i < count; i ++){                                          \
         shmem_atomic_inc(ctx, counter, 0);                                     \
     }                                                                          \
-    shmem_ctx_quiet(ctx); \
+    shmem_ctx_quiet(ctx);                                                      \
     shmem_barrier_all();                                                       \
     if (my_pe == 0){                                                           \
         log_info("PE 0: Validating incrementing results");                     \
@@ -181,13 +181,13 @@ int main(int argc, char *argv[]) {
   }
 
   /* Test atomic guarentee of standard routine */
-  bool atomic_result = true;
-  #define X(type, shmem_types) atomic_result &= ATOMIC_TEST_C11_SHMEM_ATOMIC_INC(type);
+  bool result_atomic = true;
+  #define X(type, shmem_types) result_atomic &= ATOMIC_TEST_C11_SHMEM_ATOMIC_INC(type);
     SHMEM_STANDARD_AMO_TYPE_TABLE(X)
   #undef X
 
   if (shmem_my_pe() == 0) {
-    display_test_result("C11 shmem_atomic_inc atomic test", atomic_result, false);
+    display_test_result("C11 shmem_atomic_inc atomic test", result_atomic, false);
   }
 
   /* Test context-specific atomic inc operations */
