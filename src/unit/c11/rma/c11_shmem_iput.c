@@ -36,6 +36,7 @@
       log_info("PE 0: dest=%p, src=%p, dest_stride=2, src_stride=2, nelems=5", \
                (void *)dest, (void *)src);                                     \
       shmem_iput(dest, src, 2, 2, 5, 1);                                       \
+      /*set src array to 0 to test shmem_iput blocking behavior*/              \
       for (int i = 0; i < 10; i++){                                            \
         src[i] = 0;                                                            \
       }                                                                        \
@@ -101,6 +102,7 @@
       log_info("PE 0: dest=%p, src=%p, dest_stride=2, src_stride=2, nelems=5", \
                (void *)dest, (void *)src);                                     \
       shmem_iput(ctx, dest, src, 2, 2, 5, 1);                                  \
+      /*set src array to 0 to test shmem_iput blocking behavior*/              \
       for (int i = 0; i < 10; i++){                                            \
         src[i] = 0;                                                            \
       }                                                                        \
