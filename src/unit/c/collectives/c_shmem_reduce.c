@@ -19,6 +19,21 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
 #define is_complex(X)                                                          \
   _Generic((X), float _Complex: true, double _Complex: true, default: false)
 
+/* Helper macros to get the correct creal/cimag function based on type size */
+#define complex_real(X)                                                        \
+  _Generic((X),                                                                \
+      float _Complex: crealf(X),                                               \
+      double _Complex: creal(X),                                               \
+      long double _Complex: creall(X),                                         \
+      default: (double)(X))
+
+#define complex_imag(X)                                                        \
+  _Generic((X),                                                                \
+      float _Complex: cimagf(X),                                               \
+      double _Complex: cimag(X),                                               \
+      long double _Complex: cimagl(X),                                         \
+      default: 0.0)
+
 #define TEST_C_SHMEM_MAX_REDUCE(TYPE, TYPENAME)                                \
   ({                                                                           \
     log_routine("shmem_" #TYPENAME "_max_reduce");                             \
@@ -138,8 +153,8 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
                                                                                \
     *src = (TYPE)mype;                                                         \
     if (is_complex((TYPE)0)) {                                                 \
-      log_info("set %p (src) to %g+%gi", (void *)src, (double)creall(*src),    \
-               (double)cimagl(*src));                                          \
+      log_info("set %p (src) to %g+%gi", (void *)src,                          \
+               (double)complex_real(*src), (double)complex_imag(*src));        \
     } else {                                                                   \
       log_info("set %p (src) to %g", (void *)src, (double)*src);               \
     }                                                                          \
@@ -153,8 +168,10 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
     bool success;                                                              \
     if (is_complex((TYPE)0)) {                                                 \
       /* Complex validation: check real and imaginary parts separately */      \
-      long double real_diff = fabsl(creall(*dest) - creall(expected));         \
-      long double imag_diff = fabsl(cimagl(*dest) - cimagl(expected));         \
+      long double real_diff =                                                  \
+          fabsl(complex_real(*dest) - complex_real(expected));                 \
+      long double imag_diff =                                                  \
+          fabsl(complex_imag(*dest) - complex_imag(expected));                 \
       success = (real_diff <= FLOATING_POINT_TOLERANCE) &&                     \
                 (imag_diff <= FLOATING_POINT_TOLERANCE);                       \
     } else if (is_fp) {                                                        \
@@ -210,8 +227,8 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
     }                                                                          \
     *src = src_val;                                                            \
     if (is_complex((TYPE)0)) {                                                 \
-      log_info("set %p (src) to %g+%gi", (void *)src, (double)creall(*src),    \
-               (double)cimagl(*src));                                          \
+      log_info("set %p (src) to %g+%gi", (void *)src,                          \
+               (double)complex_real(*src), (double)complex_imag(*src));        \
     } else {                                                                   \
       log_info("set %p (src) to %g", (void *)src, (double)*src);               \
     }                                                                          \
@@ -251,9 +268,11 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
     bool success;                                                              \
     if (is_complex((TYPE)0)) {                                                 \
       /* Complex validation: check real and imaginary parts separately */      \
-      long double real_diff = fabsl(creall(*dest) - creall(expected));         \
-      long double imag_diff = fabsl(cimagl(*dest) - cimagl(expected));         \
-      long double abs_expected = fabsl(creall(expected));                      \
+      long double real_diff =                                                  \
+          fabsl(complex_real(*dest) - complex_real(expected));                 \
+      long double imag_diff =                                                  \
+          fabsl(complex_imag(*dest) - complex_imag(expected));                 \
+      long double abs_expected = fabsl(complex_real(expected));                \
       long double relative_tolerance = FLOATING_POINT_TOLERANCE;               \
       if (abs_expected > 1.0L) {                                               \
         relative_tolerance = abs_expected * FLOATING_POINT_TOLERANCE;          \
@@ -494,6 +513,7 @@ int main(int argc, char *argv[]) {
   result_sum &= TEST_C_SHMEM_SUM_REDUCE(float, float);
   result_sum &= TEST_C_SHMEM_SUM_REDUCE(double, double);
   result_sum &= TEST_C_SHMEM_SUM_REDUCE(long double, longdouble);
+  // TODO: add an option to disable the below
   result_sum &= TEST_C_SHMEM_SUM_REDUCE(float _Complex, complexf);
   result_sum &= TEST_C_SHMEM_SUM_REDUCE(double _Complex, complexd);
 
@@ -533,6 +553,7 @@ int main(int argc, char *argv[]) {
   result_prod &= TEST_C_SHMEM_PROD_REDUCE(float, float);
   result_prod &= TEST_C_SHMEM_PROD_REDUCE(double, double);
   result_prod &= TEST_C_SHMEM_PROD_REDUCE(long double, longdouble);
+  // TODO: add an option to disable the below
   result_prod &= TEST_C_SHMEM_PROD_REDUCE(float _Complex, complexf);
   result_prod &= TEST_C_SHMEM_PROD_REDUCE(double _Complex, complexd);
 

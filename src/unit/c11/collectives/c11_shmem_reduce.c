@@ -22,6 +22,21 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
 #define is_complex(X)                                                          \
   _Generic((X), float _Complex: true, double _Complex: true, default: false)
 
+/* Helper macros to get the correct creal/cimag function based on type size */
+#define complex_real(X)                                                        \
+  _Generic((X),                                                                \
+      float _Complex: crealf(X),                                               \
+      double _Complex: creal(X),                                               \
+      long double _Complex: creall(X),                                         \
+      default: (double)(X))
+
+#define complex_imag(X)                                                        \
+  _Generic((X),                                                                \
+      float _Complex: cimagf(X),                                               \
+      double _Complex: cimag(X),                                               \
+      long double _Complex: cimagl(X),                                         \
+      default: 0.0)
+
 #define TEST_C11_SHMEM_MAX_REDUCE(TYPE, TYPENAME)                              \
   ({                                                                           \
     log_routine("shmem_" #TYPENAME "_max_reduce");                             \
@@ -42,10 +57,10 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
     } else {                                                                   \
       src_val = (TYPE)mype;                                                    \
     }                                                                          \
-    for (int i = 0; i < ARR_LEN; i ++){                                        \
+    for (int i = 0; i < ARR_LEN; i++) {                                        \
       src[i] = src_val + i;                                                    \
     }                                                                          \
-    log_info("src array at %p set to i + %f", (void *)src, (double) src_val);  \
+    log_info("src array at %p set to i + %f", (void *)src, (double)src_val);   \
                                                                                \
     log_info("executing shmem_max_reduce: dest = %p, src = %p", (void *)dest,  \
              (void *)src);                                                     \
@@ -60,16 +75,16 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
       expected = (TYPE)(npes - 1);                                             \
     }                                                                          \
     bool success = true;                                                       \
-    for (int i = 0; i < 10; i++){                                              \
+    for (int i = 0; i < 10; i++) {                                             \
       if (is_fp) {                                                             \
         success = (fabsl((long double)(dest[i] - (expected + i))) <=           \
-                  FLOATING_POINT_TOLERANCE);                                   \
+                   FLOATING_POINT_TOLERANCE);                                  \
       } else {                                                                 \
         success = (dest[i] == expected + i);                                   \
       }                                                                        \
-      if (!success){                                                           \
+      if (!success) {                                                          \
         printf("shmem_" #TYPENAME "_max_reduce dest[%d] = %lf, expected %d",   \
-            i, (double) dest[i], expected + i );                               \
+               i, (double)dest[i], expected + i);                              \
         break;                                                                 \
       }                                                                        \
     }                                                                          \
@@ -103,10 +118,10 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
     } else {                                                                   \
       src_val = (TYPE)mype;                                                    \
     }                                                                          \
-    for (int i = 0; i < ARR_LEN; i ++){                                        \
+    for (int i = 0; i < ARR_LEN; i++) {                                        \
       src[i] = src_val + i;                                                    \
     }                                                                          \
-    log_info("src array at %p set to i + %f", (void *)src, (double) src_val);  \
+    log_info("src array at %p set to i + %f", (void *)src, (double)src_val);   \
                                                                                \
     log_info("executing shmem_min_reduce: dest = %p, src = %p", (void *)dest,  \
              (void *)src);                                                     \
@@ -114,16 +129,16 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
                                                                                \
     log_info("validating result...");                                          \
     bool success = true;                                                       \
-    for (int i = 0; i < ARR_LEN; i++){                                         \
+    for (int i = 0; i < ARR_LEN; i++) {                                        \
       if (is_fp) {                                                             \
-        success = (fabsl((long double)(dest[i] - (i))) <=                      \
-                  FLOATING_POINT_TOLERANCE);                                   \
+        success =                                                              \
+            (fabsl((long double)(dest[i] - (i))) <= FLOATING_POINT_TOLERANCE); \
       } else {                                                                 \
         success = (dest[i] == (TYPE)(i));                                      \
       }                                                                        \
-      if (!success){                                                           \
+      if (!success) {                                                          \
         log_fail("shmem_" #TYPENAME "_min_reduce dest[%d] = %lf, expected %d", \
-            i, (double) dest[i], i);                                           \
+                 i, (double)dest[i], i);                                       \
         break;                                                                 \
       }                                                                        \
     }                                                                          \
@@ -148,13 +163,13 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
     log_info("shmem_malloc'd %d bytes @ &src = %p, %d bytes @ &dest = %p",     \
              sizeof(TYPE), (void *)src, sizeof(TYPE), (void *)dest);           \
                                                                                \
-    TYPE src_val = (TYPE)((sizeof(TYPE) == 1)? mype % 100 : mype);             \
-    for (int i = 0; i < ARR_LEN; i ++){                                        \
-      src[i] = (TYPE) (src_val + i);                                           \
+    TYPE src_val = (TYPE)((sizeof(TYPE) == 1) ? mype % 100 : mype);            \
+    for (int i = 0; i < ARR_LEN; i++) {                                        \
+      src[i] = (TYPE)(src_val + i);                                            \
     }                                                                          \
     if (is_complex((TYPE)0)) {                                                 \
-      log_info("set %p (src) to %g+%gi", (void *)src, (double)creall(*src),    \
-               (double)cimagl(*src));                                          \
+      log_info("set %p (src) to %g+%gi", (void *)src,                          \
+               (double)complex_real(*src), (double)complex_imag(*src));        \
     } else {                                                                   \
       log_info("set %p (src) to %g", (void *)src, (double)*src);               \
     }                                                                          \
@@ -164,26 +179,29 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
     shmem_sum_reduce(SHMEM_TEAM_WORLD, dest, src, ARR_LEN);                    \
                                                                                \
     log_info("validating result...");                                          \
-    TYPE exp_npes = (TYPE)((sizeof(TYPE) == 1)? npes % 100 : npes);            \
+    TYPE exp_npes = (TYPE)((sizeof(TYPE) == 1) ? npes % 100 : npes);           \
     bool success = true;                                                       \
     TYPE expected;                                                             \
-    for (int i = 0; i < ARR_LEN; i++){                                         \
-      expected = (TYPE) (exp_npes * (exp_npes - 1) / 2 + i * exp_npes);        \
+    for (int i = 0; i < ARR_LEN; i++) {                                        \
+      expected = (TYPE)(exp_npes * (exp_npes - 1) / 2 + i * exp_npes);         \
       if (is_complex((TYPE)0)) {                                               \
         /* Complex validation: check real and imaginary parts separately */    \
-        long double real_diff = fabsl(creall(dest[i]) - creall(expected));     \
-        long double imag_diff = fabsl(cimagl(dest[i]) - cimagl(expected));     \
+        long double real_diff =                                                \
+            fabsl(complex_real(dest[i]) - complex_real(expected));             \
+        long double imag_diff =                                                \
+            fabsl(complex_imag(dest[i]) - complex_imag(expected));             \
         success = (real_diff <= FLOATING_POINT_TOLERANCE) &&                   \
                   (imag_diff <= FLOATING_POINT_TOLERANCE);                     \
       } else if (is_fp) {                                                      \
         success = (fabsl((long double)(dest[i] - expected)) <=                 \
-                  FLOATING_POINT_TOLERANCE);                                   \
+                   FLOATING_POINT_TOLERANCE);                                  \
       } else {                                                                 \
         success = (dest[i] == expected);                                       \
       }                                                                        \
-      if (!success){                                                           \
-        log_fail("shmem_" #TYPENAME "_sum_reduce dest[%d] = %lf, expected %lf",\
-            i, (double) dest[i], (double) expected);                           \
+      if (!success) {                                                          \
+        log_fail("shmem_" #TYPENAME                                            \
+                 "_sum_reduce dest[%d] = %lf, expected %lf",                   \
+                 i, (double)dest[i], (double)expected);                        \
         break;                                                                 \
       }                                                                        \
     }                                                                          \
@@ -232,8 +250,8 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
     }                                                                          \
     *src = src_val;                                                            \
     if (is_complex((TYPE)0)) {                                                 \
-      log_info("set %p (src) to %g+%gi", (void *)src, (double)creall(*src),    \
-               (double)cimagl(*src));                                          \
+      log_info("set %p (src) to %g+%gi", (void *)src,                          \
+               (double)complex_real(*src), (double)complex_imag(*src));        \
     } else {                                                                   \
       log_info("set %p (src) to %g", (void *)src, (double)*src);               \
     }                                                                          \
@@ -259,7 +277,7 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
       expected = (TYPE)powl(1.1L, (long double)npes);                          \
     } else {                                                                   \
       /* For integers: use 2^npes or 1^npes depending on PE count */           \
-      if (npes > 7) {                                                         \
+      if (npes > 7) {                                                          \
         /* For large PE counts: 1^npes = 1 */                                  \
         expected = (TYPE)1;                                                    \
       } else {                                                                 \
@@ -273,9 +291,11 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
     bool success;                                                              \
     if (is_complex((TYPE)0)) {                                                 \
       /* Complex validation: check real and imaginary parts separately */      \
-      long double real_diff = fabsl(creall(*dest) - creall(expected));         \
-      long double imag_diff = fabsl(cimagl(*dest) - cimagl(expected));         \
-      long double abs_expected = fabsl(creall(expected));                      \
+      long double real_diff =                                                  \
+          fabsl(complex_real(*dest) - complex_real(expected));                 \
+      long double imag_diff =                                                  \
+          fabsl(complex_imag(*dest) - complex_imag(expected));                 \
+      long double abs_expected = fabsl(complex_real(expected));                \
       long double relative_tolerance = FLOATING_POINT_TOLERANCE;               \
       if (abs_expected > 1.0L) {                                               \
         relative_tolerance = abs_expected * FLOATING_POINT_TOLERANCE;          \
@@ -319,8 +339,8 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
     log_info("shmem_malloc'd %d bytes @ &src = %p, %d bytes @ &dest = %p",     \
              sizeof(TYPE), (void *)src, sizeof(TYPE), (void *)dest);           \
                                                                                \
-    TYPE my_pe_safe = (TYPE)(sizeof(TYPE) == 1? mype % 100: mype);             \
-    for (int i = 0; i < ARR_LEN; i++){                                         \
+    TYPE my_pe_safe = (TYPE)(sizeof(TYPE) == 1 ? mype % 100 : mype);           \
+    for (int i = 0; i < ARR_LEN; i++) {                                        \
       src[i] = (TYPE)(my_pe_safe + i);                                         \
     }                                                                          \
     log_info("set %p (src) to i + %lf", (void *)src, (double)my_pe_safe);      \
@@ -331,7 +351,7 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
                                                                                \
     log_info("validating result...");                                          \
     bool success = true;                                                       \
-    for (int i = 0; i < ARR_LEN; i++){                                         \
+    for (int i = 0; i < ARR_LEN; i++) {                                        \
       /*find expected value*/                                                  \
       TYPE expected = (TYPE)(~0);                                              \
       for (int pe = 0; pe < npes; pe++) {                                      \
@@ -340,9 +360,10 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
         expected &= src_val;                                                   \
       }                                                                        \
       success &= (dest[i] == expected);                                        \
-      if (!success){                                                           \
-        log_fail("shmem_" #TYPENAME "_and_reduce dest[%d] = %lf, expected %lf",\
-            i, (double) dest[i], (double) expected);                           \
+      if (!success) {                                                          \
+        log_fail("shmem_" #TYPENAME                                            \
+                 "_and_reduce dest[%d] = %lf, expected %lf",                   \
+                 i, (double)dest[i], (double)expected);                        \
         break;                                                                 \
       }                                                                        \
     }                                                                          \
@@ -369,8 +390,8 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
     log_info("shmem_malloc'd %d bytes @ &src = %p, %d bytes @ &dest = %p",     \
              sizeof(TYPE), (void *)src, sizeof(TYPE), (void *)dest);           \
                                                                                \
-    TYPE my_pe_safe = (TYPE)(sizeof(TYPE) == 1? mype % 100: mype);             \
-    for (int i = 0; i < ARR_LEN; i++){                                         \
+    TYPE my_pe_safe = (TYPE)(sizeof(TYPE) == 1 ? mype % 100 : mype);           \
+    for (int i = 0; i < ARR_LEN; i++) {                                        \
       src[i] = (TYPE)(my_pe_safe + i);                                         \
     }                                                                          \
     log_info("set %p (src) to i + %lf", (void *)src, (double)my_pe_safe);      \
@@ -381,7 +402,7 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
                                                                                \
     log_info("validating result...");                                          \
     bool success = true;                                                       \
-    for (int i = 0; i < ARR_LEN; i++){                                         \
+    for (int i = 0; i < ARR_LEN; i++) {                                        \
       /*find expected value*/                                                  \
       TYPE expected = 0;                                                       \
       for (int pe = 0; pe < npes; pe++) {                                      \
@@ -390,9 +411,9 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
         expected |= src_val;                                                   \
       }                                                                        \
       success &= (dest[i] == expected);                                        \
-      if (!success){                                                           \
+      if (!success) {                                                          \
         log_fail("shmem_" #TYPENAME "_or_reduce dest[%d] = %lf, expected %lf", \
-            i, (double) dest[i], (double) expected);                           \
+                 i, (double)dest[i], (double)expected);                        \
         break;                                                                 \
       }                                                                        \
     }                                                                          \
@@ -419,8 +440,8 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
     log_info("shmem_malloc'd %d bytes @ &src = %p, %d bytes @ &dest = %p",     \
              sizeof(TYPE), (void *)src, sizeof(TYPE), (void *)dest);           \
                                                                                \
-    TYPE my_pe_safe = (TYPE)(sizeof(TYPE) == 1? mype % 100: mype);             \
-    for (int i = 0; i < ARR_LEN; i++){                                         \
+    TYPE my_pe_safe = (TYPE)(sizeof(TYPE) == 1 ? mype % 100 : mype);           \
+    for (int i = 0; i < ARR_LEN; i++) {                                        \
       src[i] = (TYPE)(my_pe_safe + i);                                         \
     }                                                                          \
     log_info("set %p (src) to i + %lf", (void *)src, (double)my_pe_safe);      \
@@ -431,7 +452,7 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
                                                                                \
     log_info("validating result...");                                          \
     bool success = true;                                                       \
-    for (int i = 0; i < ARR_LEN; i++){                                         \
+    for (int i = 0; i < ARR_LEN; i++) {                                        \
       /*find expected value*/                                                  \
       TYPE expected = 0;                                                       \
       for (int pe = 0; pe < npes; pe++) {                                      \
@@ -440,9 +461,10 @@ const double FLOATING_POINT_TOLERANCE = 1e-6;
         expected ^= src_val;                                                   \
       }                                                                        \
       success &= (dest[i] == expected);                                        \
-      if (!success){                                                           \
-        log_fail("shmem_" #TYPENAME "_xor_reduce dest[%d] = %lf, expected %lf",\
-            i, (double) dest[i], (double) expected);                           \
+      if (!success) {                                                          \
+        log_fail("shmem_" #TYPENAME                                            \
+                 "_xor_reduce dest[%d] = %lf, expected %lf",                   \
+                 i, (double)dest[i], (double)expected);                        \
         break;                                                                 \
       }                                                                        \
     }                                                                          \
@@ -477,63 +499,72 @@ int main(int argc, char *argv[]) {
 
   /* Test MAX reduction - SHMEM_REDUCE_MINMAX_TYPE_TABLE */
   static bool result_max = true;
-  #define X(type, shmem_types) result_max &= TEST_C11_SHMEM_MAX_REDUCE(type, shmem_types);
-    SHMEM_REDUCE_MINMAX_TYPE_TABLE(X)
-  #undef X
+#define X(type, shmem_types)                                                   \
+  result_max &= TEST_C11_SHMEM_MAX_REDUCE(type, shmem_types);
+  SHMEM_REDUCE_MINMAX_TYPE_TABLE(X)
+#undef X
 
   reduce_test_result("C11 shmem_max_reduce", &result_max, false);
 
   /* Test MIN reduction - SHMEM_REDUCE_MINMAX_TYPE_TABLE */
   static bool result_min = true;
-  #define X(type, shmem_types) result_min &= TEST_C11_SHMEM_MIN_REDUCE(type, shmem_types);
-    SHMEM_REDUCE_MINMAX_TYPE_TABLE(X)
-  #undef X
+#define X(type, shmem_types)                                                   \
+  result_min &= TEST_C11_SHMEM_MIN_REDUCE(type, shmem_types);
+  SHMEM_REDUCE_MINMAX_TYPE_TABLE(X)
+#undef X
 
   reduce_test_result("C11 shmem_min_reduce", &result_min, false);
 
   /* Test SUM reduction - SHMEM_REDUCE_ARITH_TYPE_TABLE */
   static bool result_sum = true;
-  #define X(type, shmem_types) result_sum &= TEST_C11_SHMEM_SUM_REDUCE(type, shmem_types);
-    SHMEM_REDUCE_ARITH_TYPE_TABLE(X)
-  #undef X
+#define X(type, shmem_types)                                                   \
+  result_sum &= TEST_C11_SHMEM_SUM_REDUCE(type, shmem_types);
+  SHMEM_REDUCE_ARITH_TYPE_TABLE(X)
+#undef X
   reduce_test_result("C11 shmem_sum_reduce", &result_sum, false);
 
   /* Test PROD reduction - SHMEM_REDUCE_ARITH_TYPE_TABLE */
   static bool result_prod = true;
-  #define X(type, shmem_types) result_prod &= TEST_C11_SHMEM_PROD_REDUCE(type, shmem_types);
-    SHMEM_REDUCE_ARITH_TYPE_TABLE(X)
-  #undef X
+#define X(type, shmem_types)                                                   \
+  result_prod &= TEST_C11_SHMEM_PROD_REDUCE(type, shmem_types);
+  SHMEM_REDUCE_ARITH_TYPE_TABLE(X)
+#undef X
 
   reduce_test_result("C11 shmem_prod_reduce", &result_prod, false);
 
   /* Test AND reduction - unsigned integer types only */
   static bool result_and = true;
-  #define X(type, shmem_types) result_and &= TEST_C11_SHMEM_AND_REDUCE(type, shmem_types);
-    SHMEM_REDUCE_BITWISE_TYPE_TABLE(X)
-  #undef X
+#define X(type, shmem_types)                                                   \
+  result_and &= TEST_C11_SHMEM_AND_REDUCE(type, shmem_types);
+  SHMEM_REDUCE_BITWISE_TYPE_TABLE(X)
+#undef X
 
   reduce_test_result("C11 shmem_and_reduce", &result_and, false);
 
   /* Test OR reduction - unsigned integer types only */
   static bool result_or = true;
-  #define X(type, shmem_types) result_or &= TEST_C11_SHMEM_OR_REDUCE(type, shmem_types);
-    SHMEM_REDUCE_BITWISE_TYPE_TABLE(X)
-  #undef X
+#define X(type, shmem_types)                                                   \
+  result_or &= TEST_C11_SHMEM_OR_REDUCE(type, shmem_types);
+  SHMEM_REDUCE_BITWISE_TYPE_TABLE(X)
+#undef X
   reduce_test_result("C11 shmem_or_reduce", &result_or, false);
 
   /* Test XOR reduction - unsigned integer types only */
   static bool result_xor = true;
-  #define X(type, shmem_types) result_xor &= TEST_C11_SHMEM_XOR_REDUCE(type, shmem_types);
-    SHMEM_REDUCE_BITWISE_TYPE_TABLE(X)
-  #undef X
+#define X(type, shmem_types)                                                   \
+  result_xor &= TEST_C11_SHMEM_XOR_REDUCE(type, shmem_types);
+  SHMEM_REDUCE_BITWISE_TYPE_TABLE(X)
+#undef X
 
   reduce_test_result("C11 shmem_xor_reduce", &result_xor, false);
 
   /* Single barrier at the end */
   shmem_barrier_all();
 
-  bool rc = result_max & result_min & result_and & result_or & result_xor 
-    & result_prod & result_sum ? EXIT_SUCCESS : EXIT_FAILURE;
+  bool rc = result_max & result_min & result_and & result_or & result_xor &
+                    result_prod & result_sum
+                ? EXIT_SUCCESS
+                : EXIT_FAILURE;
   log_close(rc);
   shmem_finalize();
   return rc;
