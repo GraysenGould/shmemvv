@@ -321,9 +321,9 @@ int main(int argc, char *argv[]) {
 
   /* Test standard shmem_ibget variants */
   #define X(type, typename) \
-    result &= TEST_C_SHMEM_IBGET(type, typename, 8, 8, 4, 2); /* Same stride */ \
-    result &= TEST_C_SHMEM_IBGET(type, typename, 8, 12, 4, 2); /* larger source stride*/ \
-    result &= TEST_C_SHMEM_IBGET(type, typename, 12, 8, 4, 2); /* larger dest stride */ \
+    result &= TEST_C_SHMEM_IBGET(type, typename, 4, 4, 4, 2); /* Same stride */ \
+    result &= TEST_C_SHMEM_IBGET(type, typename, 4, 7, 4, 2); /* larger source stride*/ \
+    result &= TEST_C_SHMEM_IBGET(type, typename, 7, 4, 4, 2); /* larger dest stride */ \
 
     SHMEM_STANDARD_RMA_TYPE_TABLE(X)
   #undef X
@@ -348,9 +348,9 @@ int main(int argc, char *argv[]) {
 
   /* Test context-specific shmem_ibget variants */  
   #define X(type, typename) \
-    result_ctx &= TEST_C_CTX_SHMEM_IBGET(type, typename, 8, 8, 4, 2); \
-    result_ctx &= TEST_C_CTX_SHMEM_IBGET(type, typename, 8, 12, 4, 2); \
-    result_ctx &= TEST_C_CTX_SHMEM_IBGET(type, typename, 12, 8, 4, 2);
+    result_ctx &= TEST_C_CTX_SHMEM_IBGET(type, typename, 4, 4, 4, 2); \
+    result_ctx &= TEST_C_CTX_SHMEM_IBGET(type, typename, 4, 7, 4, 2); \
+    result_ctx &= TEST_C_CTX_SHMEM_IBGET(type, typename, 7, 4, 4, 2);
 
     SHMEM_STANDARD_RMA_TYPE_TABLE(X)
   #undef X

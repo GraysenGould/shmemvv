@@ -177,9 +177,9 @@ int main(int argc, char *argv[]) {
 
   /* Test standard shmem_ibput variants */
   #define X(type, shmem_types) \
-    result &= TEST_C11_SHMEM_IBPUT(type, 8, 8, 4, 2); /* Same stride */ \
-    result &= TEST_C11_SHMEM_IBPUT(type, 8, 12, 4, 2); /* larger source stride*/ \
-    result &= TEST_C11_SHMEM_IBPUT(type, 12, 8, 4, 2); /* larger dest stride */ \
+    result &= TEST_C11_SHMEM_IBPUT(type, 4, 4, 4, 2); /* Same stride */ \
+    result &= TEST_C11_SHMEM_IBPUT(type, 4, 7, 4, 2); /* larger source stride*/ \
+    result &= TEST_C11_SHMEM_IBPUT(type, 7, 4, 4, 2); /* larger dest stride */ \
 
     SHMEM_STANDARD_RMA_TYPE_TABLE(X)
   #undef X
@@ -191,9 +191,9 @@ int main(int argc, char *argv[]) {
 
   /* Test context-specific shmem_ibput variants */  
   #define X(type, shmem_types) \
-    result_ctx &= TEST_C11_CTX_SHMEM_IBPUT(type, 8, 8, 4, 2); \
-    result_ctx &= TEST_C11_CTX_SHMEM_IBPUT(type, 8, 12, 4, 2); \
-    result_ctx &= TEST_C11_CTX_SHMEM_IBPUT(type, 12, 8, 4, 2);
+    result_ctx &= TEST_C11_CTX_SHMEM_IBPUT(type, 4, 4, 4, 2); \
+    result_ctx &= TEST_C11_CTX_SHMEM_IBPUT(type, 4, 7, 4, 2); \
+    result_ctx &= TEST_C11_CTX_SHMEM_IBPUT(type, 7, 4, 4, 2);
 
     SHMEM_STANDARD_RMA_TYPE_TABLE(X)
   #undef X
