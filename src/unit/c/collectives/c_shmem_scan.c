@@ -1,5 +1,5 @@
 /**
- * @file c11_shmem_scan.c
+ * @file c_shmem_scan.c
  *
  * @brief Unit test for shmem_scan().
  */
@@ -12,7 +12,7 @@
 #include "shmemvv.h"
 #include "type_tables.h"
 
-#define TEST_C11_SHMEM_SUM_INSCAN(TYPE, NELEMS)                                \
+#define TEST_C_SHMEM_SUM_INSCAN(TYPE, TYPENAME, NELEMS)                        \
   ({                                                                           \
     log_routine("shmem_scan(" #TYPE ")");                                      \
     int npes = shmem_n_pes();                                                  \
@@ -32,7 +32,7 @@
                                                                                \
     log_info("executing shmem_sum_inscan: dest = %p, src = %p", (void *)dest,  \
              (void *)src);                                                     \
-    shmem_sum_inscan(SHMEM_TEAM_WORLD, dest, src, NELEMS);                     \
+    shmem_##TYPENAME##_sum_inscan(SHMEM_TEAM_WORLD, dest, src, NELEMS);        \
     log_info("validating result...");                                          \
     bool success = true;                                                       \
     for (int i = 0; i < NELEMS; i++) {                                         \
@@ -58,7 +58,7 @@
     success;                                                                   \
   })
 
-#define TEST_C11_SHMEM_SUM_EXSCAN(TYPE, NELEMS)                                \
+#define TEST_C_SHMEM_SUM_EXSCAN(TYPE, TYPENAME, NELEMS)                        \
   ({                                                                           \
     log_routine("shmem_scan(" #TYPE ")");                                      \
     int npes = shmem_n_pes();                                                  \
@@ -78,16 +78,15 @@
                                                                                \
     log_info("executing shmem_sum_inscan: dest = %p, src = %p", (void *)dest,  \
              (void *)src);                                                     \
-    shmem_sum_exscan(SHMEM_TEAM_WORLD, dest, src, NELEMS);                     \
+    shmem_##TYPENAME##_sum_exscan(SHMEM_TEAM_WORLD, dest, src, NELEMS);        \
     log_info("validating result...");                                          \
     bool success = true;                                                       \
     for (int i = 0; i < NELEMS; i++) {                                         \
       /* reproduce expected result */                                          \
-      TYPE expected;                                                           \
       if (mype != 0)                                                           \
-        expected = (mype * (mype - 1 ) / 2) + i * mype;                        \
+        TYPE expected = (mype * (mype + 1 ) / 2) + i * (mype + 1);             \
       else                                                                     \
-        expected = 0;                                                          \
+        TYPE expected = 0;                                                     \
       if (dest[i] != expected){                                                \
         success = false;                                                       \
         log_fail("Expected %d at index %d, got %d instead",(int) expected,     \
@@ -113,31 +112,26 @@ int main(int argc, char *argv[]) {
   log_init(__FILE__);
 
   if (!(shmem_n_pes() >= 2)) {
-    log_warn("Not enough PEs to run test (requires 2 PEs, have %d PEs)",
-             shmem_n_pes());
-    if (shmem_my_pe() == 0) {
+    log_warn("Not enough PEs to run test (requires 2 PEs, have %d PEs)", 
+        shmem_n_pes()); 
+    if (shmem_my_pe() == 0) { 
       display_not_enough_pes("collectives");
     }
     shmem_finalize();
     return EXIT_SUCCESS;
   }
-  static bool sum_inscan_res = true;
-  #define X(type, shmem_types) sum_inscan_res &= TEST_C11_SHMEM_SUM_INSCAN(type, 4);
+
+  static bool result = true;
+  #define X(type, shmem_types)                           \
+    result &= TEST_C_SHMEM_SUM_INSCAN(type, shmem_types, 4);
     SHMEM_REDUCE_ARITH_TYPE_TABLE(X)
   #undef X
 
   shmem_barrier_all();
-  reduce_test_result("C11 shmem_sum_inscan", &sum_inscan_res, false);
-
-  static bool sum_exscan_res = true;
-  #define X(type, shmem_types) sum_exscan_res &= TEST_C11_SHMEM_SUM_EXSCAN(type, 4);
-    SHMEM_REDUCE_ARITH_TYPE_TABLE(X)
-  #undef X
-  shmem_barrier_all();
-  reduce_test_result("C11 shmem_sum_exscan", &sum_exscan_res, false);
+  reduce_test_result("C shmem_scan", &result, false);
 
 
-  bool passed = sum_inscan_res && sum_exscan_res;
+  bool passed = result;
   log_close(!passed);
   shmem_finalize();
   return passed ? EXIT_SUCCESS : EXIT_FAILURE;
